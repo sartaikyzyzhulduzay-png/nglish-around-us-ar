@@ -74,12 +74,31 @@ Object.entries(scenes).forEach(([key,s])=>{
 });
 const ar=document.querySelector('#arView'),video=document.querySelector('#camera'),fallback=document.querySelector('#cameraFallback');
 let activeKey='technology',index=0,stream=null;
-function renderWord(){const s=scenes[activeKey],w=s.words[index];document.documentElement.style.setProperty('--accent',s.color);document.querySelector('#categoryName').textContent=s.name;document.querySelector('#stepCount').textContent=`${index+1} / ${s.words.length}`;document.querySelector('#object').textContent=w.object;document.querySelector('#word').textContent=w.word;document.querySelector('#ipa').textContent=w.ipa;document.querySelector('#kazakh').textContent=w.kz;document.querySelector('#example').textContent=w.example}
+const audioStatus=document.querySelector('#audioStatus');
+let voices=[];
+function loadVoices(){if('speechSynthesis' in window)voices=window.speechSynthesis.getVoices()}
+loadVoices();
+if('speechSynthesis' in window)window.speechSynthesis.onvoiceschanged=loadVoices;
+function renderWord(){const s=scenes[activeKey],w=s.words[index];document.documentElement.style.setProperty('--accent',s.color);document.querySelector('#categoryName').textContent=s.name;document.querySelector('#stepCount').textContent=`${index+1} / ${s.words.length}`;document.querySelector('#object').textContent=w.object;document.querySelector('#word').textContent=w.word;document.querySelector('#ipa').textContent=w.ipa;document.querySelector('#kazakh').textContent=w.kz;document.querySelector('#example').textContent=w.example;audioStatus.textContent='Tap “Hear the word” to listen.'}
 async function startCamera(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});video.srcObject=stream;fallback.hidden=true}catch(e){fallback.hidden=false}}
-async function openScene(key){activeKey=key;index=0;ar.hidden=false;document.body.style.overflow='hidden';history.replaceState(null,'',`?scene=${key}`);renderWord();await startCamera();setTimeout(speak,450)}
+async function openScene(key){activeKey=key;index=0;ar.hidden=false;document.body.style.overflow='hidden';history.replaceState(null,'',`?scene=${key}`);renderWord();await startCamera()}
 function closeScene(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}ar.hidden=true;document.body.style.overflow='';history.replaceState(null,'',location.pathname)}
-function speak(){const w=scenes[activeKey].words[index];speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(`${w.word}. ${w.example}`);u.lang='en-GB';u.rate=.78;speechSynthesis.speak(u)}
+function speak(){
+ const w=scenes[activeKey].words[index];
+ if(!('speechSynthesis' in window)){audioStatus.textContent='Audio is not supported in this browser. Open the link in Chrome.';return}
+ window.speechSynthesis.cancel();
+ window.speechSynthesis.resume();
+ const u=new SpeechSynthesisUtterance(`${w.word}. ${w.example}`);
+ loadVoices();
+ u.voice=voices.find(v=>v.lang==='en-GB')||voices.find(v=>v.lang&&v.lang.startsWith('en'))||null;
+ u.lang=u.voice?.lang||'en-GB';u.rate=.72;u.pitch=1;u.volume=1;
+ u.onstart=()=>audioStatus.textContent=`Playing: ${w.word}`;
+ u.onend=()=>audioStatus.textContent='Tap again to repeat.';
+ u.onerror=()=>audioStatus.textContent='Sound did not start. Turn up media volume and tap again.';
+ window.speechSynthesis.speak(u);
+ setTimeout(()=>window.speechSynthesis.resume(),120);
+}
 document.querySelector('#speak').onclick=speak;
-document.querySelector('#next').onclick=()=>{index=(index+1)%scenes[activeKey].words.length;renderWord();speak()};
+document.querySelector('#next').onclick=()=>{index=(index+1)%scenes[activeKey].words.length;renderWord()};
 document.querySelector('#closeAr').onclick=closeScene;
 const requested=new URLSearchParams(location.search).get('scene');if(requested&&scenes[requested])openScene(requested);
