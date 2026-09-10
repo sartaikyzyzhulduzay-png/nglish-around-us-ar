@@ -1,0 +1,18 @@
+.ar-open .home {
+  display: none !important;
+}
+
+.camera-fallback[hidden] {
+  display: none !important;
+}
+
+.chrome-link {
+  display: block;
+  margin-top: 7px;
+  text-align: center;
+  color: #bfeaff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
