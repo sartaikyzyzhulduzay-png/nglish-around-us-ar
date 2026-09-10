@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#071a38">
+  <title>English Around Us AR Mini Dictionary</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="home" class="home">
+    <header class="masthead">
+      <span class="eyebrow">Student Research Project</span>
+      <h1>English Around Us</h1>
+      <p>Choose a page, open the camera, and hear everyday English.</p>
+    </header>
+    <section id="sceneGrid" class="scene-grid" aria-label="Vocabulary categories"></section>
+    <p class="privacy">The camera stays on your device. No video is saved.</p>
+  </main>
+
+  <section id="arView" class="ar-view" hidden aria-live="polite">
+    <video id="camera" autoplay playsinline muted></video>
+    <div class="camera-fallback" id="cameraFallback" hidden>
+      <span>Camera preview is unavailable</span>
+      <small>You can still hear and practise the words.</small>
+    </div>
+    <div class="scanline" aria-hidden="true"></div>
+    <header class="ar-topbar">
+      <button id="closeAr" class="icon-button" aria-label="Close AR view">×</button>
+      <div><small>AR WORD PAGE</small><strong id="categoryName"></strong></div>
+      <span id="stepCount" class="step-count"></span>
+    </header>
+    <div class="ar-stage">
+      <div id="object" class="ar-object" aria-hidden="true"></div>
+      <article class="word-panel">
+        <h2 id="word"></h2>
+        <p id="ipa" class="ipa"></p>
+        <p id="kazakh" class="kazakh"></p>
+        <p id="example" class="example"></p>
+        <div class="controls">
+          <button id="speak" class="primary">🔊 Hear the word</button>
+          <button id="next" class="secondary">Next word →</button>
+        </div>
+      </article>
+    </div>
+  </section>
+  <script src="app.js"></script>
+</body>
+</html>
