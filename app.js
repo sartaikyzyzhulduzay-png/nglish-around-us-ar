@@ -81,8 +81,8 @@ loadVoices();
 if('speechSynthesis' in window)window.speechSynthesis.onvoiceschanged=loadVoices;
 function renderWord(){const s=scenes[activeKey],w=s.words[index];document.documentElement.style.setProperty('--accent',s.color);document.querySelector('#categoryName').textContent=s.name;document.querySelector('#stepCount').textContent=`${index+1} / ${s.words.length}`;document.querySelector('#object').textContent=w.object;document.querySelector('#word').textContent=w.word;document.querySelector('#ipa').textContent=w.ipa;document.querySelector('#kazakh').textContent=w.kz;document.querySelector('#example').textContent=w.example;audioStatus.textContent='Tap “Hear the word” to listen.'}
 async function startCamera(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});video.srcObject=stream;fallback.hidden=true}catch(e){fallback.hidden=false}}
-async function openScene(key){activeKey=key;index=0;ar.hidden=false;document.body.style.overflow='hidden';history.replaceState(null,'',`?scene=${key}`);renderWord();await startCamera()}
-function closeScene(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}ar.hidden=true;document.body.style.overflow='';history.replaceState(null,'',location.pathname)}
+async function openScene(key){activeKey=key;index=0;document.body.classList.add('ar-open');ar.hidden=false;document.body.style.overflow='hidden';history.replaceState(null,'',`?scene=${key}`);renderWord();await startCamera()}
+function closeScene(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}ar.hidden=true;document.body.classList.remove('ar-open');document.body.style.overflow='';history.replaceState(null,'',location.pathname)}
 function speak(){
  const w=scenes[activeKey].words[index];
  if(!('speechSynthesis' in window)){audioStatus.textContent='Audio is not supported in this browser. Open the link in Chrome.';return}
@@ -101,4 +101,10 @@ function speak(){
 document.querySelector('#speak').onclick=speak;
 document.querySelector('#next').onclick=()=>{index=(index+1)%scenes[activeKey].words.length;renderWord()};
 document.querySelector('#closeAr').onclick=closeScene;
+const chromeLink=document.querySelector('#openChrome');
+if(/Android/i.test(navigator.userAgent)){
+ chromeLink.href=`intent://${location.host}${location.pathname}${location.search}#Intent;scheme=https;package=com.android.chrome;end`;
+}else{
+ chromeLink.href=location.href;chromeLink.target='_blank';chromeLink.rel='noopener';
+}
 const requested=new URLSearchParams(location.search).get('scene');if(requested&&scenes[requested])openScene(requested);
